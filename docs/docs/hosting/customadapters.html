@@ -1,0 +1,63 @@
+---
+layout: doc_layout
+title: Creating a Custom Service Host Adapter
+category: Service Hosting
+prev: /docs/hosting/iis.html
+next: /docs/transports/introduction.html
+---
+
+<p>It is possible to embed Wave into other hosting containers. To facilitate this, subclass <code>Wave.BusHost</code> and override the <code>Start</code> and <code>Stop</code> methods:</p>
+<br/>
+{% highlight c# linenos %}
+public class CustomHost : BusHost
+{
+    public CustomHost(IConfigurationContext configuration)
+        : base(configuration)
+    {
+    }
+
+    public override void Start()
+    {                       
+        base.Start();       
+    }
+
+    public override void Stop()
+    {           
+        base.Stop();       
+    }
+}
+{% endhighlight %}
+<br/>
+<p>It is important to note that you MUST call the <code>base.Start</code> and <code>base.Stop</code> methods, and that <code>base.Start</code> will block forever, so if you need
+	to yield control back to the calling application, call <code>base.Start</code> from a seperate thread.</p>
+
+<p>You can enable the custom host using fluent configuration:</p>
+
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+{
+    c.UsingServiceHost<CustomHost>();
+});
+
+host.Start();
+{% endhighlight %}
+<br/>
+
+<p>Or by using XML configuration in the host's configuration file:</p>
+
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections>   	
+    <!-- The Wave section must be added -->
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>       
+  </configSections>  
+  
+  <wave>
+  	<!-- The serviceHost node specifies the .NET class that contains the service host to use -->
+  	<serviceHost type="MyCompany.CustomHost"/>
+  </wave>   
+</configuration>
+{% endhighlight %}

@@ -1,0 +1,110 @@
+---
+layout: doc_layout
+title: Topshelf
+category: Service Hosting
+prev: /docs/hosting/defaultservicehost.html
+next: /docs/hosting/iis.html
+---
+
+<div class="bs-callout bs-callout-info">
+      <h4>Note</h4>	  
+      <p>Topshelf is currently the recommended best practice for hosting Wave services in production.</p>
+</div>
+
+<p>Topshelf is a very popular service hosting library that allows an application to run as both a console application and a Windows Service. This is ideal, as it allows the application to be ran in console
+	mode during development, and as a headless service in production.</p>
+
+<p>To use Topshelf, add this NuGet package to your project:</p>
+
+<div class="nuget-badge">
+   <p>
+		 <code>PM&gt; Install-Package Wave.ServiceHosting.TopShelf </code>
+   </p>
+</div>
+
+<p>With this package installed, enabling Topshelf as the service host can be done using fluent configuration when configuring the host:</p>
+
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+    {
+        // Using all default values
+        //
+        // This is usually adequate, service credentials can be
+        // passed into the host during install time, giving more
+        // flexibility
+        c.UseTopshelf();
+
+        // Or, if you want to have finer grained control, you can specify
+        // all of the Topshelf configuration in code:
+        c.UseTopshelf(tc =>
+        {
+        	// Specify the Service Name
+        	tc.WithServiceName("Example Service");
+
+        	// Specify the Display Name 
+        	tc.WithDisplayName("Example Service");
+
+        	// Specify the Service Description
+        	tc.WithDescription("Example Service Description");
+
+        	// Specify the user to run the service as
+        	tc.WithUsername("DOMAIN\ACCOUNT");
+
+        	// The password to the user above
+        	tc.WithPassword("password");
+
+        	// If you don't pass a username/password above, you can specify specific
+        	// machine accounts by using one of these three:
+        	tc.RunAsLocalService();
+        	tc.RunAsLocalSystem();
+        	tc.RunAsNetworkService()
+    	    });
+    });
+{% endhighlight %}
+<br/>
+
+<p>Or specified using XML configuration in the host's configuration file:</p>
+
+<br/>
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections> 
+  	
+    <!-- The Wave section must be added -->
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>
+    
+    <!-- If you want to specify topshelf settings, this section must be included -->
+    <section name="wave.topshelf" type="Wave.ServiceHosting.TopShelf.Configuration.ConfigurationSection, Wave.ServiceHosting.TopShelf"/>
+  
+  </configSections>  
+  
+  <wave>
+  	<!-- The serviceHost node specifies the .NET class that contains the service host to use -->
+  	<serviceHost type="Wave.ServiceHosting.TopShelf.TopShelfHost"/>
+  </wave>  
+
+  <wave.topshelf>
+  	<!-- All of these attributes are optional -->
+  	<runAs 
+  		username="DOMAIN\ACCOUNT"
+  		password="password"
+  		userType="USER|LOCALSYSTEM|LOCALSERVICE|NETWORKSERVICE"/>
+
+  	<service
+  		name="Example Service"
+  		description="Example Service Description"
+  		displayName="Example Service"/>
+  </wave.topshelf>
+
+</configuration>
+{% endhighlight %}
+
+<p>Wave services hosted inside of topshelf can be installed using the technique described on the Topshelf website:</p>
+{% highlight bash linenos %}
+MyService.exe install -username "DOMAIN\ACCOUNT" -password "PASSWORD"
+{% endhighlight %}
+
+<p>Topshelf has many options and is beyond the scope of this reference. Please refer to the <a href="http://docs.topshelf-project.com/en/latest/index.html">official Topshelf documentation</a> for more details.</p>

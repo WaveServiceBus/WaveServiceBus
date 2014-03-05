@@ -1,0 +1,47 @@
+---
+layout: doc_layout
+title: Json.net
+category: Serialization
+prev: /docs/serialization/defaultserializer.html
+next: /docs/serialization/xml.html
+---
+
+<p>Json.net is a very popular JSON serialization library that is used by out of the box by ASP.NET WebAPI and in many other projects.</p>
+<p>To use Json.net, add this NuGet package to your project:</p>
+
+<div class="nuget-badge">
+   <p>
+		 <code>PM&gt; Install-Package Wave.Serialization.JsonDotNet </code>
+   </p>
+</div>
+
+<p>With this package installed, enabling Json.net as the serializer can be done using fluent configuration when configuring the host:</p>
+
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+    {
+        c.UseJsonDotNet();
+    });
+{% endhighlight %}
+<br/>
+
+<p>Or specified using XML configuration in the host's configuration file:</p>
+
+<br/>
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections> 
+  	<!-- The Wave section must be added -->       
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>
+  </configSections>  
+  <wave>
+  	<!-- The serializer node specifies the .NET class that contains the serializer to use -->
+  	<serializer type="Wave.Serialization.JsonDotNet.JsonDotNetSerializer"/>
+  </wave>  
+</configuration>
+{% endhighlight %}
+
+

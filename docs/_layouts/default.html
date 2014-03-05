@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+    <title>Wave Service Bus</title>    
+    <link href="/css/bootstrap.min.cosmo.css" rel="stylesheet">    
+    <!--<link href="/css/bootstrap-theme.min.css" rel="stylesheet">   -->
+	<link href="/css/default.css" rel="stylesheet">   
+  </head>
+  <body>      
+    <div class="container">
+		<div class="masthead">
+			<h3 class="text">
+				<img src="/images/logo.png"/>
+				Wave Service Bus
+			</h3>
+			<div class="navbar navbar-default">
+				<div class="container">
+					<div class="navbar-collapse navbar-collapse collapse">
+					<ul class="nav navbar-nav">
+					<li><a href="/">Home</a></li>					
+					<li><a href="/features/">Features</a></li>			  
+					<li><a href="/quickstart/">Quick Start</a></li>			
+					<li><a href="/docs/">Documentation</a></li>					  
+					<li><a href="/blog/">Blog</a></li>
+					<li><a href="/downloads/">Downloads</a></li>			  			  	  			 
+					<li><a href="/code/">Code</a></li>			  			  			  
+					<li><a href="/support/">Support</a></li>			  			  			  
+					</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		{{ content }}     
+		<div class="footer">
+			<p>&copy; Wave Service Bus 2013 - 2014</p>
+      </div>
+    </div>  
+	
+    <script src="/js/jquery-2.0.3.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>    
+	<script>
+		$(document).ready(function() {
+			var pathname = window.location.pathname;		
+			$(".nav li").slice(1).each(function(index) {								
+				if (pathname.toUpperCase().indexOf($('a', this).attr('href').toUpperCase()) != -1)
+					$(this).addClass("active");
+			});			
+			if ($(".nav li.active").length == 0)				
+				$(".nav li").first().addClass("active");
+			});
+	</script>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+---
+layout: doc_layout
+title: Creating a Custom Transport
+category: Transports
+prev: /docs/transports/msmq.html
+---
+
+<p>It is possible to create custom transports for Wave as long as the transport satisfies these basic conditions:</p>
+
+<ul>
+	<li>Messages published must be durable and delivered to subscribers even if subscribers are not online.</li>
+	<li>Publishers cannot be rate limited by subscribers capacity.</li>
+	<li>Messages can be redelivered in case of error.</li>
+	<li>Messages can be requested to be delayed and redelivered in the future.</li>
+	<li>Error / Dead Letter messages can be stored in a durable location.</li>	
+</ul>
+
+<p>Most message brokers satisify these conditions, for example, a transport could be built ontop of ActiveMQ or Azure Service Bus.</p>
+
+<p>To build a transport implementation, implement the interface <code>Wave.ITransport</code>. The best guide on this would be to reference
+	the RabbitMQ transport source on <a href="">Github</a>.</p>
+
+<p>There is a suite of transport tests in the offical Wave repository that verify that the transport implementation meets the behavioral expectations
+	of Wave publishers and subscribers. Make sure your custom transport passes all of these tests.</p>
+
+<p>Once you have a transport implementation, using it in a service can be done using fluent configuration:</p>
+
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+    {        
+        c.UsingTransport<AwesomeTransport>();      
+    });
+{% endhighlight %}
+<br/>
+
+<p>Or by using XML configuration in the host's configuration file:</p>
+
+<br/>
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections>   	
+    <!-- The Wave section must be added -->
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>        
+  </configSections>  
+  
+  <wave>
+  	<!-- The transport node specifies the .NET class that contains the transport to use -->
+  	<transport type="MyCompany.AwesomeTransport"/>
+  </wave>    
+</configuration>
+{% endhighlight %}
+<br/>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>Wave Service Bus - IoC - Unity</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://www.waveservicebus.com</projectUrl>
+    <iconUrl>http://www.waveservicebus.com/images/logo.png/</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2014 Jonathan Holland</copyright>
+    <dependencies>
+      <dependency id="Wave.Core" version="[$version$]"/>
+      <dependency id="Unity" version="3.0.1304.1" />      
+    </dependencies>
+  </metadata>
+</package>

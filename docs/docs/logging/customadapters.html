@@ -1,0 +1,130 @@
+---
+layout: doc_layout
+title: Creating a Custom Logging Adapter
+category: Logging
+prev: /docs/logging/nlog.html
+next: /docs/serialization/defaultserializer.html
+---
+
+<p>While Wave has support for the major .NET logging frameworks via NuGet packages, your infrastructure may use a custom logging solution.</p>
+<p>Wave provides a interface (<code>Wave.ILogger</code>) that all logging adapters implement. This interface can be used to bridge 
+	between Wave and your custom logging solution.</p>
+
+<p>This is an example implementation with a fictatious logging system:</p>
+<br/>
+{% highlight c# linenos %}
+    public class AwesomeLoggerAdapter : ILogger
+    {
+        private readonly AwesomeLogger internalLogger;
+        
+        public AwesomeLoggerAdapter(IConfigurationContext configuration)
+        {
+            internalLogger = new AwesomeLogger();
+        }
+
+        public bool IsDebugEnabled
+        {
+            get { return internalLogger.IsDebugEnabled; }
+        }
+
+        public bool IsErrorEnabled
+        {
+            get { return internalLogger.IsErrorEnabled; }
+        }
+
+        public bool IsFatalEnabled
+        {
+            get { return internalLogger.IsFatalEnabled; }
+        }
+
+        public bool IsInfoEnabled
+        {
+            get { return internalLogger.IsInfoEnabled; }
+        }
+
+        public bool IsWarnEnabled
+        {
+            get { return internalLogger.IsWarnEnabled; }
+        }
+
+        public void Debug(string message)
+        {
+            internalLogger.Debug(message);
+        }
+
+        public void DebugFormat(string format, params object[] args)
+        {
+            internalLogger.Debug(format, args);
+        }
+
+        public void Error(string message)
+        {
+            internalLogger.Error(message);
+        }
+
+        public void ErrorFormat(string format, params object[] args)
+        {
+            internalLogger.Error(format, args);
+        }
+
+        public void Fatal(string message)
+        {
+            internalLogger.Fatal(message);
+        }
+
+        public void FatalFormat(string format, params object[] args)
+        {
+            internalLogger.Fatal(format, args);
+        }
+
+        public void Info(string message)
+        {
+            internalLogger.Info(message);
+        }
+
+        public void InfoFormat(string format, params object[] args)
+        {
+            internalLogger.Info(format, args);
+        }
+
+        public void Warn(string message)
+        {
+            internalLogger.Warn(message);
+        }
+
+        public void WarnFormat(string format, params object[] args)
+        {
+            internalLogger.Warn(format, args);
+        }
+    }
+{% endhighlight %}
+<br/>
+<p>
+	Once the logging adapter is written, you can instruct Wave to use it by using fluent configuration when configuring the host:
+</p>
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+    {
+        c.UsingLogger<AwesomeLoggerAdapter>();
+    });
+{% endhighlight %}
+<br/>
+<p>Or by using XML configuration in the host's configuration file:</p>
+
+<br/>
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections> 
+  	<!-- The Wave section must be added -->       
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>
+  </configSections>  
+  <wave>
+  	<!-- The logger node specifies the .NET class that contains the logging adapter to use -->
+    <logger type="MyCompany.AwesomeLoggerAdapter"/>
+  </wave>  
+</configuration>
+{% endhighlight %}
+

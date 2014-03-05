@@ -1,0 +1,116 @@
+---
+layout: doc_layout
+title: RabbitMQ
+category: Transports
+prev: /docs/transports/introduction.html
+next: /docs/transports/msmq.html
+---
+
+<div class="bs-callout bs-callout-info">
+      <h4>Note</h4>	  
+      <p>RabbitMQ is currently the recommended best practice broker for production use.</p>
+</div>
+
+<h4>Installation</h4>
+<p>
+	RabbitMQ is highly available, high performance, open source message broker. To use RabbitMQ as a Wave service broker, add this NuGet package to your project:
+</p>
+
+<div class="nuget-badge">
+   <p>
+		 <code>PM&gt; Install-Package Wave.Transports.RabbitMQ </code>
+   </p>
+</div>
+
+<p>With this package installed, enabling the RabbitMQ transport can be done using fluent configuration when configuring the host:</p>
+
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+    {
+        // Using default configuration
+        c.UseRabbitMQ();
+
+        // Or specify explicit configuration
+        c.UseRabbitMQ(rmq =>
+        {
+            rmq.UseConnectionString("amqp://guest:guest@localhost:5672");
+            rmq.UseExchange("Name of RabbitMQ Exchange");
+        });
+    });
+{% endhighlight %}
+<br/>
+
+<p>Or by using XML configuration in the host's configuration file:</p>
+
+<br/>
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections>   	
+    <!-- The Wave section must be added -->
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>    
+    <!-- If you want to specify rabbitmq settings, this section must be included -->
+    <section name="wave.rabbitmq" type="Wave.Transports.RabbitMQ.Configuration.ConfigurationSection, Wave.Transports.RabbitMQ"/>  
+  </configSections>  
+  
+  <connectionStrings>
+  	<add name="MyConnection" connectionString="amqp://guest:guest@localhost:5672"/>
+  </connectionStrings>
+
+  <wave>
+  	<!-- The transport node specifies the .NET class that contains the transport to use -->
+  	<transport type="Wave.Transports.RabbitMQ.RabbitMQTransport"/>
+  </wave>  
+
+  <!-- All of these attributes are optional -->
+  <wave.rabbitmq connectionStringName="MyConnection" exchange="MyExchange"/>  	  
+</configuration>
+{% endhighlight %}
+<br/>
+<h4>Default Configuration</h4>
+<p>
+	All configuration values are optional. The following defaults are used if a value is not specified:
+</p>
+
+<table class="table table-condensed table-bordered">
+	<tr>
+		<th>Name</th>		
+		<th>Default Value</th>
+		<th>Notes</th>
+	</tr>
+	<tr>
+		<td>ConnectionString</td>		
+		<td>amqp://guest:guest@localhost:5672</td>
+		<td>If not set, first looks for a connection string called "RabbitMQ", if this is not found, it will default to this localhost URI.</td> 			
+	</tr>
+	<tr>
+		<td>Exchange</td>		
+		<td>Wave</td>
+		<td></td> 			
+	</tr>
+</table>
+
+<p>If you add a connection string named "RabbitMQ" to your application config, the default behavior will automatically use this. Otherwise you can specify it directly in the fluent configuration.</p>
+<br/>
+<h4>AMQP Connection Strings</h4>
+
+<p>RabbitMQ uses AMQP URI's as the connection string. These follow the same format as other URL's, using AMPQ as the scheme:
+
+<pre>
+amqp://[USERNAME]:[PASSWORD]@[BROKER_HOST_OR_IP]:[PORT]
+</pre>
+<br/>
+<h4>High Availability</h4>
+<p>RabbitMQ supports broker clustering and queue mirroring. If you want to use Wave in a highly available active/active environment, use the following setup:</p>
+<ul>
+	<li>Cluster several Rabbit nodes together.</li>
+	<li>Create a RabbitMQ Policy that forces all queues on the Wave exchange to be mirrored across the full cluster.</li>
+	<li>Use a TCP load balancer, or a DNS service with a very low TTL, to create a VIP URL infront of the cluster nodes.</li>
+	<li>Use this VIP URL as your connection string for all Wave services.</li>
+</ul>
+<p>
+	For more details about high availability with RabbitMQ, reference the <a href="http://www.rabbitmq.com/ha.html">official documentation</a>.
+</p>
+

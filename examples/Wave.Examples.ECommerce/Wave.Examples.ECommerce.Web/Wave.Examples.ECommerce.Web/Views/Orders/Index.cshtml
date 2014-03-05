@@ -1,0 +1,30 @@
+﻿@model List<Wave.Examples.ECommerce.Models.Order>
+
+<h1>Order Management</h1>
+
+<h3>All Orders:</h3>
+
+<table border="2">
+    <tr>
+        <th>Number</th>
+        <th>Date</th>
+        <th>Customer</th>
+        <th>Status</th>
+        <th>Item</th>
+        <th>Quantity</th>
+    </tr>
+
+    @foreach (var order in this.Model)
+    {
+        <tr>
+            <td>@order.Number</td>
+            <td>@order.OrderDate</td>
+            <td>@order.CustomerEmail</td>
+            <td>@order.Status</td>
+            <td>@order.Item</td>
+            <td>@order.Quantity</td>
+        </tr>
+    }
+</table>
+
+@Html.Partial("Create", new Wave.Examples.ECommerce.Models.Order())

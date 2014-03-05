@@ -1,0 +1,32 @@
+---
+layout: doc_layout
+title: Unity
+category: IoC Container Support
+prev: /docs/ioc/structuremap.html
+next: /docs/ioc/customadapters.html
+---
+
+<p>To use Unity, add this NuGet package to your project:</p>
+
+<div class="nuget-badge">
+   <p>
+		 <code>PM&gt; Install-Package Wave.IoC.Unity </code>
+   </p>
+</div>
+
+<p>With this package installed, enabling Unity as the IoC container can be done using fluent configuration when configuring the host:</p>
+
+<br/>
+{% highlight c# linenos %}
+
+// Create and configure the Unity container
+var container = new UnityContainer();
+container.RegisterType<IMyService, MyService>();
+
+var host = ServiceBus.ConfigureForHosting(c =>
+    {
+        // Pass the container to wave
+        c.UseUnity(container);
+    });
+{% endhighlight %}
+<br/>

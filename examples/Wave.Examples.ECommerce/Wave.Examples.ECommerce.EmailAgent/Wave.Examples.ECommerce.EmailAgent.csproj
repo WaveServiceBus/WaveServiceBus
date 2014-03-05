@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{90D37A9B-73A5-4FE7-A5EF-6CF0720BED00}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Wave.Examples.ECommerce.EmailAgent</RootNamespace>
+    <AssemblyName>Wave.Examples.ECommerce.EmailAgent</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\..\..\packages\EntityFramework.6.0.2\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\..\..\packages\EntityFramework.6.0.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MailHelper.cs" />
+    <Compile Include="ServiceHost.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Subscriptions\OrderBackorderedSubscription.cs" />
+    <Compile Include="Subscriptions\OrderShippedSubscription.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Wave.Core\Wave.Core.csproj">
+      <Project>{6b2f3282-85a6-4177-8840-cfe0a6417fd8}</Project>
+      <Name>Wave.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\Wave.Serialization.JsonDotNet\Wave.Serialization.JsonDotNet.csproj">
+      <Project>{2680a100-b18b-40a1-8e7c-7cb4dd86cdb7}</Project>
+      <Name>Wave.Serialization.JsonDotNet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\Wave.Transports.RabbitMQ\Wave.Transports.RabbitMQ.csproj">
+      <Project>{657addb4-7d1e-469d-9296-bab710392ec8}</Project>
+      <Name>Wave.Transports.RabbitMQ</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Wave.Examples.ECommerce.Messages\Wave.Examples.ECommerce.Messages.csproj">
+      <Project>{78715a12-171e-4ed8-bf7a-10ca994a5120}</Project>
+      <Name>Wave.Examples.ECommerce.Messages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Wave.Examples.ECommerce.Models\Wave.Examples.ECommerce.Models.csproj">
+      <Project>{dceafa0a-0c5a-4333-8291-7b8a52591ea7}</Project>
+      <Name>Wave.Examples.ECommerce.Models</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

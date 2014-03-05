@@ -1,0 +1,28 @@
+---
+layout: doc_layout
+title: Logging with Wave
+category: Logging
+prev: /docs/ioc/customadapters.html
+next: /docs/logging/commonslogging.html
+---
+
+<p>
+	Wave logs some diagnostics information on startup, and will log exceptions etc. By default, Wave will log to the console:	
+</p>
+
+<br/>
+<div style="text-align: center;">
+	<img src="defaultlogger.png"/>
+</div>
+<br/>
+
+<p>
+	This is fine for development purposes, but is not flexible for production use. You may want to log to the system event log, or to a rolling file etc.	
+</p>
+<p>
+	Rather than re-invent the wheel, Wave is designed to easily integrate with existing logging frameworks. It is likely that a preferred logger is already part of your infrastructure. The next sections 
+	demonstrate how to integrate with the most popular .NET logging frameworks.
+</p>
+<p>
+	If your infrastructure uses a custom logging system, it is straight forward to <a href="/docs/logging/customadapters.html">create an adapter</a> to bridge Wave logging into your system.
+</p>

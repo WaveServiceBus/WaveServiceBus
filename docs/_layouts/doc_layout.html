@@ -1,0 +1,87 @@
+---
+layout: default
+---
+
+<div class="row" style="margin-top: 30px">
+	<div class="col-lg-3">
+		<div style="margin-top: 15px;">
+			<div class="panel-body">			
+				<div class="sidebar-nav" style='font-size: .75em'>
+					<ul class="nav">				
+						<li>WSB Concepts</li>
+						<li><a href="/docs/">Introduction</a></li>
+						<li><a href="/docs/concepts/pubsuboverview.html">Pub-Sub overview</a></li>				
+						<li><a href="/docs/concepts/bestpractices.html">Best practices</a></li>				
+						<li>Installation &amp; Configuration</li>
+						<li><a href="/docs/configuration/introduction.html">Introduction</a></li>
+						<li><a href="/docs/configuration/hosting.html">Hosting a WSB service</a></li>
+						<li><a href="/docs/configuration/publishing.html">Publishing to services</a></li>
+						<li><a href="/docs/configuration/fluentconfig.html">Fluent configuration</a></li>
+						<li><a href="/docs/configuration/xmlconfig.html">XML configuration</a></li>
+						<li><a href="/docs/configuration/bestpractices.html">Best practices</a></li>											
+						<li>Messages &amp; Handlers</li>
+						<li><a href="/docs/messagehandling/messagerepositories.html">Message repositories</a></li>
+						<li><a href="/docs/messagehandling/messagehandlers.html">Creating message handlers</a></li>
+						<li><a href="/docs/messagehandling/handlerresults.html">Handler results</a></li>				
+						<li><a href="/docs/messagehandling/messagefilters.html">Message filters</a></li>										
+						<li>Testing</li>
+						<li><a href="/docs/testing/messageflows.html">Testing message flows</a></li>
+						<li><a href="/docs/testing/handlers.html">Unit-Testing individual handlers</a></li>
+						<li>IoC Container Support</li>											
+						<li><a href="/docs/ioc/defaultcontainer.html">IoC with Wave</a></li>
+						<li><a href="/docs/ioc/autofac.html">AutoFac</a></li>
+						<li><a href="/docs/ioc/castlewindsor.html">Castle Windsor</a></li>
+						<li><a href="/docs/ioc/ninject.html">NInject</a></li>
+						<li><a href="/docs/ioc/structuremap.html">StructureMap</a></li>
+						<li><a href="/docs/ioc/unity.html">Unity</a></li>
+						<li><a href="/docs/ioc/customadapters.html">Creating a custom IoC adapter</a></li>
+						<li>Logging</li>											
+						<li><a href="/docs/logging/defaultlogger.html">Logging with Wave</a></li>
+						<li><a href="/docs/logging/commonslogging.html">Commons Logging</a></li>
+						<li><a href="/docs/logging/log4net.html">Log4Net</a></li>
+						<li><a href="/docs/logging/nlog.html">NLog</a></li>
+						<li><a href="/docs/logging/customadapters.html">Creating a custom logging adapter</a></li>
+						<li>Serialization</li>											
+						<li><a href="/docs/serialization/defaultserializer.html">Serialization with Wave</a></li>
+						<li><a href="/docs/serialization/jsondotnet.html">Json.net</a></li>						
+						<li><a href="/docs/serialization/xml.html">XML</a></li>
+						<li><a href="/docs/serialization/customadapters.html">Creating a custom serialization adapter</a></li>
+						<li>Service Hosting</li>
+						<li><a href="/docs/hosting/defaultservicehost.html">Default Service Host</a></li>
+						<li><a href="/docs/hosting/topshelf.html">Topshelf</a></li>
+						<li><a href="/docs/hosting/iis.html">IIS</a></li>
+						<li><a href="/docs/hosting/customadapters.html">Creating a custom service host adapter</a></li>
+						<li>Transports</li>
+						<li><a href="/docs/transports/introduction.html">Understanding Transports</a><li>
+						<li><a href="/docs/transports/rabbitmq.html">RabbitMQ</a></li>
+						<li><a href="/docs/transports/msmq.html">MSMQ</a><li>						
+						<li><a href="/docs/transports/customtransports.html">Creating a custom transport</a></li>						
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-9">
+		<div class="page-header" style="margin-top: 20px">
+			<h2>{{ page.title }}</h2>
+		</div>
+		<ol class="breadcrumb">
+			<li><a href="/docs/">Documentation</a></li>
+			<li>{{ page.category }}</li>
+			<li class="active">{{ page.title }}</li>
+		</ol>
+		
+		{{ content }}   
+		
+		{% if page.next or page.prev %}
+			<ul class="pager">
+			  {% if page.prev %}
+				<li class="previous"><a href="{{ page.prev }}">&larr; Previous Page</a></li>
+			  {% endif %}
+			  {% if page.next %}
+				<li class="next"><a href="{{ page.next }}">Next Page &rarr;</a></li>
+			  {% endif %}
+			</ul>
+		{% endif %}
+	</div>
+</div>

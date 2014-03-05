@@ -1,0 +1,24 @@
+---
+layout: doc_layout
+title: Serialization with Wave
+category: Serialization
+prev: /docs/logging/customadapters.html
+next: /docs/serialization/jsondotnet.html
+---
+
+<p>
+	Serilization is the process of taking a object and converting it into a representation that can be sent across the network. Wave uses serialization when moving a message from a publisher to its subscribers.
+</p>
+<p>
+	Out of the box, Wave uses the <a href="http://msdn.microsoft.com/en-us/library/system.runtime.serialization.json.datacontractjsonserializer(v=vs.110).aspx">WCF DataContract Json</a> serializer to achieve this. However, Wave also provides support for the most popular .NET serialization frameworks via additional NuGet packages.
+</p>
+
+<div class="bs-callout bs-callout-warning">
+      <h4>Warning</h4>	  
+      <p>All serializers work slightly differently, even if they use the same underlying format. Because of this, it is <strong>highly</strong> recommended that all publishers and subscribers use the same serializer.</p>
+</div>
+
+<p>The next sections will explain how to integrate with these 3rd party serializers.</p>
+<p>
+	If your infrastructure uses a custom serialization system, it is straight forward to <a href="/docs/serialization/customadapters.html">create an adapter</a> to bridge Wave serialization into your system.
+</p>

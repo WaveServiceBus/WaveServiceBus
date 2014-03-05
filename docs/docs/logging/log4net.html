@@ -1,0 +1,48 @@
+---
+layout: doc_layout
+title: Log4Net
+category: Logging
+prev: /docs/logging/commonslogging.html
+next: /docs/logging/nlog.html
+---
+
+<p>Log4Net is a popular logging framework that is used by many enterprises.</p>
+<p>To integrate with Log4Net, add this NuGet package to your project:</p>
+
+<div class="nuget-badge">
+   <p>
+		 <code>PM&gt; Install-Package Wave.Logging.Log4Net </code>
+   </p>
+</div>
+
+<p>With this package installed, enabling Log4Net support can be done using fluent configuration when configuring the host:</p>
+
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+    {
+        c.UseLog4Net();
+    });
+{% endhighlight %}
+<br/>
+
+<p>Or specified using XML configuration in the host's configuration file:</p>
+
+<br/>
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections> 
+  	<!-- The Wave section must be added -->       
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>
+  </configSections>  
+  <wave>
+  	<!-- The logger node specifies the .NET class that contains the logging adapter to use -->
+    <logger type="Wave.Logging.Log4Net.Log4NetLogger"/>
+  </wave>  
+</configuration>
+{% endhighlight %}
+<br/>
+
+<p>The configuration for Log4Net itself is a large topic and is outside of the scope of this reference.</p>

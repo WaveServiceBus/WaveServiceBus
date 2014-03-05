@@ -1,0 +1,67 @@
+---
+layout: doc_layout
+title: Creating a Custom IoC Container Adapter
+category: IoC Container Support
+prev: /docs/ioc/unity.html
+next: /docs/logging/defaultlogger.html
+---
+
+<p>While Wave has support for the major .NET IoC containers via NuGet packages, your infrastructure may use a different IoC container.</p>
+<p>Wave provides a interface (<code>Wave.IContainer</code>) that all container adapters implement. This interface can be used to bridge 
+	between Wave and your IoC container.</p>
+
+<p>This is an example implementation with a fictatious IoC Container:</p>
+<br/>
+{% highlight c# linenos %}
+    public class AwesomeContainerAdapter : IContainer
+    {
+        private readonly AwesomeContainer container;
+
+        public AwesomeContainerAdapter(AwesomeContainer container)
+        {
+            this.container = container;
+        }
+
+        public T Resolve<T>()
+        {
+            return (T)this.Resolve(typeof(T));
+        }
+
+        public object Resolve(Type type)
+        {                       
+            return this.container.GetInstance(type);
+        }
+
+        public void Register<TFrom, TTo>(Wave.InstanceScope scope) 
+            where TTo : TFrom
+        {
+            this.Register(typeof(TFrom), typeof(TTo), scope);
+        }
+
+        public void Register(Type from, Type to, Wave.InstanceScope scope)
+        {
+            if (scope == Wave.InstanceScope.Singleton)
+            {
+                this.container.Register(from).To(to).Singleton();
+            }
+            else if (scope == Wave.InstanceScope.Transient)
+            {
+		   this.container.Register(from).To(to).Transient();
+            }
+        }
+    }
+{% endhighlight %}
+<br/>
+<p>
+	Once the container adapter is written, you can instruct Wave to use it by using fluent configuration when configuring the host:
+</p>
+<br/>
+{% highlight c# linenos %}
+var container = new AwesomeContainer();
+container.Register<IMyService>().To<MyService>();
+
+var host = ServiceBus.ConfigureForHosting(c =>
+    {
+       c.UsingContainer(new AwesomeContainerAdapter(container));
+    });
+{% endhighlight %}

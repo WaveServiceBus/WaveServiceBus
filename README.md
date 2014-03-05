@@ -1,4 +1,1 @@
-WaveServiceBus
-==============
-
-Wave Service Bus
+# Wave Service Bus

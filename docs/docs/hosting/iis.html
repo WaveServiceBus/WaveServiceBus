@@ -1,0 +1,145 @@
+---
+layout: doc_layout
+title: IIS
+category: Service Hosting
+prev: /docs/hosting/topshelf.html
+next: /docs/hosting/customadapters.html
+---
+
+<div class="bs-callout bs-callout-danger">
+      <h4>Warning</h4>	  
+      <p>IIS Integration is ONLY supported in IIS 7.5 (Windows Server 2008 R2) or newer. There are NO PLANS to support older versions of IIS.</p>
+</div>
+
+<p>
+	Wave services can be embedded inside of a existing ASP.NET application (running in IIS) by using the IIS package.
+</p>
+
+<p>
+	This is useful when you have a front-end application or a web service that also wants to subscribe to messages. The IIS package works by running a embedded wave host in a seperate thread on the IIS worker process.
+</p>
+
+<div class="bs-callout bs-callout-info">
+      <h4>Note</h4>	  
+      <p>IIS integration should only be used when creating hybrid ASP.NET / Wave applications, and it should not be used to host a dedicated Wave service in production. Use <a href="/docs/hosting/topshelf.html">Topshelf</a> to host the Wave service as a Windows Service if you do not need ASP.NET.</p>
+</div>
+
+<h4>Installation</h4>
+<p>
+	To embed Wave into a existing ASP.NET application, add this NuGet package to your web project:
+</p>
+
+<div class="nuget-badge">
+   <p>
+		 <code>PM&gt; Install-Package Wave.ServiceHosting.IIS </code>
+   </p>
+</div>
+
+<p>With this package installed, you can enable the Wave host by calling <code>ServiceBus.ConfigureForHosting</code> inside of the <code>Application_Start</code> method in <code>Global.asax.cs</code>:</p>
+
+<br/>
+{% highlight c# linenos %}
+namespace SomeWeb.Application
+{   
+    public class MvcApplication : System.Web.HttpApplication
+    {
+        protected void Application_Start()
+        {
+            // Other ASP.NET Initilization Code
+
+            var host = ServiceBus.ConfigureForHosting(c =>
+            {
+                // Instructs Wave to use the embedded IIS Host
+                c.UseIIS();
+            });
+
+            // This will not block execution when in IIS mode.
+            host.Start();
+        }
+    }
+}
+{% endhighlight %}
+<br/>
+
+<h4>Automatic Configuration</h4>
+<p>The IIS service host has a automatic configuration feature that, when enabled, will modify the site in <code>applicationHost.config</code> and set the following values:</p>
+<ul>
+	<li>Sets Application Pool to "StartAutomatically".</li>
+	<li>Sets the StartProvider for the Application Pool to point to <code>Wave.ServiceHosting.IIS.AutoStartProvider</code>.</li>
+	<li>Sets the Application Pool to "AlwaysRunning" mode.</li>
+</ul>
+
+<p>If you do not want to use automatic configuration, these configuration changes must be manually applied to IIS to ensure that the service host is able to run reliably and without interruptions.</p>
+
+<p>When using this feature, the process running the IIS application must have permissions to be able to modify <code>applicationHost.config</code> on startup. This feature can be enabled when configuring
+	the host:</p>
+
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+{
+    // Instructs Wave to use the embedded IIS Host
+    c.UseIIS(iis =>
+    {
+        iis.UseAutomaticConfiguration();
+    });
+});
+
+// This will not block execution when in IIS mode.
+host.Start();
+{% endhighlight %}
+<br/>
+
+<h4>Unique Queues per Worker Process</h4>
+<div class="bs-callout bs-callout-danger">
+      <h4>Warning</h4>	  
+      <p>This will cause each worker process restart to create a new set of queues. Not only will this litter the broker with unused queues, it will also orphan messages in those old queues. This feature is 
+      	only useful for specific scenarios, and should be avoided until additional support for queue management and migrating orphan messages is implemented.</p>
+</div>
+<p>Usually IIS applications are configured into a farm, and in each IIS instance, multiple worker processes can be ran for each application. By default, the IIS integration package will use a set of
+	shared queues and allow each worker to retrieve messages in a round-robin fashion.</p>
+<p>However, it may be desirable to have a dedicated work queue per IIS worker process. This is mode can be enabled when configuring the host:</p>
+
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+{
+    // Instructs Wave to use the embedded IIS Host
+    c.UseIIS(iis =>
+    {
+        iis.UseUniqueQueuePerWorker();
+    });
+});
+
+// This will not block execution when in IIS mode.
+host.Start();
+{% endhighlight %}
+<br/>
+
+<h4>Using Web.Config for configuration</h4>
+<p>
+	All of the configuration values described above can also be applied to the application through the web.config file:
+</p>
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections> 
+  	
+    <!-- The Wave section must be added -->
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>
+    
+    <!-- If you want to specify IIS settings, this section must be included -->
+    <section name="wave.iis" type="Wave.ServiceHosting.IIS.Configuration.ConfigurationSection, Wave.ServiceHosting.IIS"/>
+  
+  </configSections>  
+  
+  <wave>
+  	<!-- The serviceHost node specifies the .NET class that contains the service host to use -->
+  	<serviceHost type="Wave.ServiceHosting.IIS.IISHost"/>
+  </wave>  
+
+  <wave.iis useAutomaticConfiguration="true|false" useQueuePerWorker="true|false"/>  	
+
+</configuration>
+{% endhighlight %}

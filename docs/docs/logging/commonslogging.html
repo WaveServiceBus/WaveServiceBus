@@ -1,0 +1,48 @@
+---
+layout: doc_layout
+title: Commons Logging
+category: Logging
+prev: /docs/logging/defaultlogger.html
+next: /docs/logging/log4net.html
+---
+
+<p>Commons Logging is a logging framework abstraction that is used by many enterprises.</p>
+<p>To integrate with Commons Logging, add this NuGet package to your project:</p>
+
+<div class="nuget-badge">
+   <p>
+		 <code>PM&gt; Install-Package Wave.Logging.CommonsLogging </code>
+   </p>
+</div>
+
+<p>With this package installed, enabling Commons Logging support can be done using fluent configuration when configuring the host:</p>
+
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+    {
+        c.UseCommonsLogging();
+    });
+{% endhighlight %}
+<br/>
+
+<p>Or specified using XML configuration in the host's configuration file:</p>
+
+<br/>
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections> 
+  	<!-- The Wave section must be added -->       
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>
+  </configSections>  
+  <wave>
+  	<!-- The logger node specifies the .NET class that contains the logging adapter to use -->
+    <logger type="Wave.Logging.CommonsLogging.CommonsLogger"/>
+  </wave>  
+</configuration>
+{% endhighlight %}
+<br/>
+
+<p>The configuration for Commons Logging itself is a large topic and is outside of the scope of this reference.</p>

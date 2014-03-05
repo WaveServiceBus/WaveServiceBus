@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6B2F3282-85A6-4177-8840-CFE0A6417FD8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Wave.Core</RootNamespace>
+    <AssemblyName>Wave.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>RELEASE;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configuration\ConfigurationContext.cs" />
+    <Compile Include="Configuration\ConfigurationSection.cs" />
+    <Compile Include="Configuration\ConfigurationSource.cs" />
+    <Compile Include="Configuration\FluentConfigurationSource.cs" />
+    <Compile Include="Configuration\ReflectionConfigurationSource.cs" />
+    <Compile Include="Configuration\XMLConfigurationSource.cs" />
+    <Compile Include="Enums\InstanceScope.cs" />
+    <Compile Include="Extensions\MessageFilterExtensions.cs" />
+    <Compile Include="Filters\LogMessages.cs" />
+    <Compile Include="Filters\ThrottleMessages.cs" />
+    <Compile Include="HandlerResults\ReplyResult.cs" />
+    <Compile Include="Interfaces\IConfigurationContext.cs" />
+    <Compile Include="Consumers\DelayConsumer.cs" />
+    <Compile Include="HandlerResults\IgnoreResult.cs" />
+    <Compile Include="Interfaces\IOutboundMessageFilter.cs" />
+    <Compile Include="Interfaces\IQueueNameResolver.cs" />
+    <Compile Include="Interfaces\ISubscriptionKeyResolver.cs" />
+    <Compile Include="Interfaces\ITestFrameworkAdapter.cs" />
+    <Compile Include="Defaults\DefaultHost.cs" />
+    <Compile Include="BusClient.cs" />
+    <Compile Include="Interfaces\IConsumer.cs" />
+    <Compile Include="Defaults\DefaultQueueNameResolver.cs" />
+    <Compile Include="Defaults\DefaultSubscriptionKeyResolver.cs" />
+    <Compile Include="ServiceBus.cs" />
+    <Compile Include="Defaults\DefaultTransport.cs" />
+    <Compile Include="Configuration\ConfigurationBuilder.cs" />
+    <Compile Include="Consumers\PrimaryConsumer.cs" />
+    <Compile Include="HandlerResults\DelayResult.cs" />
+    <Compile Include="HandlerResults\FailResult.cs" />
+    <Compile Include="Interfaces\IAssemblyLocator.cs" />
+    <Compile Include="Interfaces\ITransport.cs" />
+    <Compile Include="Interfaces\IHandlerResult.cs" />
+    <Compile Include="HandlerResults\RetryResult.cs" />
+    <Compile Include="HandlerResults\SuccessResult.cs" />
+    <Compile Include="Interfaces\IContainer.cs" />
+    <Compile Include="Interfaces\ISubscription.cs" />
+    <Compile Include="Interfaces\ILogger.cs" />
+    <Compile Include="Interfaces\IInboundMessageFilter.cs" />
+    <Compile Include="Interfaces\IBusClient.cs" />
+    <Compile Include="Interfaces\ISerializer.cs" />
+    <Compile Include="Interfaces\IBusHost.cs" />
+    <Compile Include="Defaults\DefaultAssemblyLocator.cs" />
+    <Compile Include="Defaults\DefaultContainer.cs" />
+    <Compile Include="Defaults\DefaultLogger.cs" />
+    <Compile Include="Defaults\DefaultSerializer.cs" />
+    <Compile Include="MessageEnvelope.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RawMessage.cs" />
+    <Compile Include="BusHost.cs" />
+    <Compile Include="Testing\PublishedMessageInterceptor.cs" />
+    <Compile Include="Testing\TestScenarioBuilder.cs" />
+    <Compile Include="Testing\TestScenarioExecutor.cs" />
+    <Compile Include="Testing\TestScenario.cs" />
+    <Compile Include="Utility\ConfigurationHelper.cs" />
+    <Compile Include="Utility\PriorityQueue.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Wave.Core.nuspec" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

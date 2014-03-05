@@ -1,0 +1,23 @@
+---
+layout: doc_layout
+title: Understanding Transports
+category: Transports
+prev: /docs/hosting/customadapters.html
+next: /docs/transports/rabbitmq.html
+---
+
+<p>Tranports are the glue that connect a Wave service to a broker. They abstract the low level connection and marshalling code, allowing the core of Wave to be agnostic of 
+	the underlying communication protocol and behavior.</p>
+
+<div style="text-align: center;">
+	<img src="transports.png"/>
+</div>
+
+<p>In the diagram above, the arrows would be the transport layer.</p>
+
+<p>As a service developer, you should need to know very little about the internal workings of each transport. Simply pick the transport that matches the broker you are using (RabbitMQ, MSMQ etc) and
+	focus on writing actual service logic. Regardless of the chosen transport, the message delivery semantics and behavior of Wave will be the same.</p>
+
+<p>Out of the box, Wave only comes with a in-memory transport. This transport <strong> is only useful for unit testing</strong>. Messages are stored in local process memory and will not be delivered to other running processes. While this might seem silly, it is by design to ensure that you can test your Wave services in isolation and without having to run a broker.</p>
+
+<p>You must install a transport package to actually use Wave to communicate between services. The next sections will go over the details of the available transports.</p>

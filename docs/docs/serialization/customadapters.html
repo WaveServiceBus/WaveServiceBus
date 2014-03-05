@@ -1,0 +1,79 @@
+---
+layout: doc_layout
+title: Creating a Custom Serialization Adapter
+category: Serialization
+prev: /docs/serialization/xml.html
+next: /docs/hosting/defaultservicehost.html
+---
+
+<p>While Wave has support for the major .NET serialization frameworks via NuGet packages, your infrastructure may use a different serialization solution.</p>
+<p>Wave provides a interface (<code>Wave.ISerializer</code>) that all serialization adapters implement. This interface can be used to bridge 
+	between Wave and your custom serialization solution.</p>
+
+<p>This is an example implementation with a fictatious serialization system:</p>
+<br/>
+{% highlight c# linenos %}
+    public class AwesomeSerializationAdapter : ISerializer
+    {
+        public string ContentType
+        {
+            get
+            {
+            	   // Specify the MIME type of the data here, this is used by the transports
+                return "application/xml";
+            }
+        }
+
+        public Encoding Encoding
+        {
+            get
+            {
+            	   // This is used by the transports as well
+                return Encoding.UTF8;
+            }
+        }
+
+
+        public object Deserialize(string input, Type type)
+        {    
+        	// Call the Deserializer here and convert the string to an object
+        	return new AwesomeSerializer().Deserialize(input,type);                   
+        }
+
+        public string Serialize(object input)
+        {           
+            // Call the Serializer here and convert the object to a string
+            return new AwesomeSerializer().Serialize(input);
+        }                     
+    }    
+{% endhighlight %}
+<br/>
+<p>
+	Once the serialization adapter is written, you can instruct Wave to use it by using fluent configuration when configuring the host:
+</p>
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+    {
+       c.UsingSerializer<AwesomeSerializerAdapter>();
+    });
+{% endhighlight %}
+<br/>
+<p>Or by using XML configuration in the host's configuration file:</p>
+
+<br/>
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections> 
+  	<!-- The Wave section must be added -->       
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>
+  </configSections>  
+  <wave>
+  	<!-- The serializer node specifies the .NET class that contains the serializer to use -->
+  	<serializer type="MyCompany.AwesomeSerializerAdapter"/>
+  </wave>  
+</configuration>
+{% endhighlight %}
+

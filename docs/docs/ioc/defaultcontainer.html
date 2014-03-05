@@ -1,0 +1,43 @@
+---
+layout: doc_layout
+title: IoC with Wave
+category: IoC Container Support
+prev: /docs/testing/handlers.html
+next: /docs/ioc/autofac.html
+---
+
+<p>
+	Wave is designed around the principle of Inversion Of Control, and internally all of the various components of Wave are wired together using this pattern. In addition to this, when Wave creates subscription instances, it will attempt resolve and inject all constructor arguments to the subscription:
+</p>
+
+<br/>
+{% highlight c# linenos %}
+
+public class ExampleSubscription : ISubscription<ExampleMessage>
+{
+	private readonly IMyService service;
+
+	// Wave will automatically inject a instance of IMyService when creating this subscription
+	public ExampleSubscription(IMyService service)
+	{
+	    this.service = service;
+	}
+
+	public IHandlerResult Handle (MessageEnvelope<ExampleMessage> message)
+	{
+	    // etc ..
+	}
+}
+
+{% endhighlight %}
+<br/>
+
+<p>
+	IoC and Dependency Injection are powerful tools, and they enable subscriptions to be easier to test and support loose coupling. However, most developers either already using an existing IoC container, or not using one at all.
+</p>
+<p>
+	If you are not using a IoC container, you don't need to change anything. Wave will fall back on a internal embedded container to wire itself together. However, if you are already using one of the many popular IoC containers, you can instruct Wave to use that container internally. 
+</p>
+<p>
+	The following sections detail how to integrate Wave with the current popular IoC container frameworks.
+</p>

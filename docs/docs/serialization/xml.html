@@ -1,0 +1,45 @@
+---
+layout: doc_layout
+title: XML
+category: Serialization
+prev: /docs/serialization/jsondotnet.html
+next: /docs/serialization/customadapters.html
+---
+
+<p>Out of the box, Wave only supports the <a href="http://msdn.microsoft.com/en-us/library/system.runtime.serialization.json.datacontractjsonserializer(v=vs.110).aspx">WCF JSON DataContract Serializer</a>. This package adds XML support using the <a href="http://msdn.microsoft.com/en-us/library/system.runtime.serialization.datacontractserializer(v=vs.110).aspx">WCF XML DataContract Serializer</a></p>
+<p>To enable XML serialization add this NuGet package to your project:</p>
+
+<div class="nuget-badge">
+   <p>
+		 <code>PM&gt; Install-Package Wave.Serialization.Xml </code>
+   </p>
+</div>
+
+<p>With this package installed, enabling XML Serialization can be done using fluent configuration when configuring the host:</p>
+
+<br/>
+{% highlight c# linenos %}
+var host = ServiceBus.ConfigureForHosting(c =>
+    {
+        c.UseXMLSerialization();
+    });
+{% endhighlight %}
+<br/>
+
+<p>Or specified using XML configuration in the host's configuration file:</p>
+
+<br/>
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an example of a minimal .NET configuration file -->
+<configuration>
+  <configSections> 
+  	<!-- The Wave section must be added -->       
+    <section name="wave" type="Wave.Configuration.ConfigurationSection, Wave.Core"/>
+  </configSections>  
+  <wave>
+  	<!-- The serializer node specifies the .NET class that contains the serializer to use -->
+  	<serializer type="Wave.Serialization.Xml.XmlSerializer"/>
+  </wave>  
+</configuration>
+{% endhighlight %}

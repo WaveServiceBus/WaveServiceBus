@@ -1,0 +1,25 @@
+﻿@model Wave.Examples.ECommerce.Models.Order
+
+<h3>Create Order</h3>
+
+@using (Html.BeginForm("Create", "Orders", FormMethod.Post))
+{
+    @Html.ValidationSummary()
+
+    <div>
+        @Html.LabelFor(m => m.CustomerEmail)
+        @Html.TextBoxFor(m => m.CustomerEmail)
+    </div>
+   
+    <div>
+        @Html.LabelFor(m => m.Item)
+        @Html.TextBoxFor(m => m.Item)
+    </div>
+    
+    <div>
+        @Html.LabelFor(m => m.Quantity)
+        @Html.TextBoxFor(m => m.Quantity)
+    </div>
+    
+    <input type="submit" value="Create Order" />
+}
