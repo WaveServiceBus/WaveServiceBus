@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30110.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wave.Core", "Wave.Core\Wave.Core.csproj", "{6B2F3282-85A6-4177-8840-CFE0A6417FD8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3711E227-B1C5-47AE-BDFA-06A9C22142E8}"
@@ -102,6 +104,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{755EA6ED-0FA9-4E8E-BA81-0AA0873D0734}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wave.Examples.ECommerce.EmailAgent", "..\examples\Wave.Examples.ECommerce\Wave.Examples.ECommerce.EmailAgent\Wave.Examples.ECommerce.EmailAgent.csproj", "{90D37A9B-73A5-4FE7-A5EF-6CF0720BED00}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{328502C5-EDED-466E-9BFA-C3DA511FF89F}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
