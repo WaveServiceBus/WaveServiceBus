@@ -66,7 +66,7 @@ namespace Wave.Transports.RabbitMQ.Tests
         [TestFixtureTearDown]
         public void TearDown()
         {
-            #if !INTEGRATION
+            #if INTEGRATION
                 // Removes all the queues used for the tests
                 var connection = new RabbitConnectionManager(new Uri(connectionString));
                 using (var channel = connection.GetChannel())
