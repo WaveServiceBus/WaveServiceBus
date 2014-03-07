@@ -68,9 +68,10 @@ namespace Wave.Transports.RabbitMQ
         {
             using (var channel = this.connectionManager.GetChannel())
             {
-                var workQueue = channel.QueueDeclare(this.primaryQueueName, true, false, false, null);
-                var delayQueue = channel.QueueDeclare(this.delayQueueName, true, false, false, null);
-                var errorQueue = channel.QueueDeclare(this.errorQueueName, true, false, false, null);
+                var autoDelete = this.configuration.GetAutoDeleteQueues();
+                var workQueue = channel.QueueDeclare(this.primaryQueueName, true, autoDelete, autoDelete, null);
+                var delayQueue = channel.QueueDeclare(this.delayQueueName, true, autoDelete, autoDelete, null);
+                var errorQueue = channel.QueueDeclare(this.errorQueueName, true, autoDelete, autoDelete, null);
 
                 // Create a routing key for the work queue name for direct sends
                 channel.QueueBind(workQueue, this.configuration.GetExchange(), this.primaryQueueName);

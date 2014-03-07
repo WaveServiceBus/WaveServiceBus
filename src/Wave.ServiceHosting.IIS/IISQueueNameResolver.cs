@@ -28,9 +28,11 @@ namespace Wave.ServiceHosting.IIS
 
         public override string GetPrimaryQueueName()
         {
-            return String.Format("{0}_{1}",
+            return String.Format("{0}_{1}_{2}",
                 base.GetPrimaryQueueName(),
-                Environment.MachineName);
+                Environment.MachineName,
+                Process.GetCurrentProcess().Id
+                );
         }
     }
 }

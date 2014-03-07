@@ -35,8 +35,9 @@ namespace Wave
 
             return builder.UsingTransport<RabbitMQTransport>(context =>
             {
+                context.SetAutoDeleteQueues(settings.AutoDeleteQueues);
                 context.SetConnectionString(settings.ConnectionString);
-                context.SetExchange(settings.Exchange);
+                context.SetExchange(settings.Exchange);                
             });
         }
     }
