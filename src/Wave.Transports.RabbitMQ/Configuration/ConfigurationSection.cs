@@ -31,6 +31,13 @@ namespace Wave.Transports.RabbitMQ.Configuration
         {
             get { return (string)base["exchange"]; }
             set { base["exchange"] = value; }
-        }       
+        }
+
+        [ConfigurationProperty("autoDeleteQueues", IsRequired = false)]
+        public bool AutoDeleteQueues
+        {
+            get { return bool.Parse((string)base["autoDeleteQueues"]); }
+            set { base["autoDeleteQueues"] = value.ToString(); }
+        }
     }
 }
