@@ -69,7 +69,7 @@ namespace Wave.Transports.MSMQ.Tests
         [TestFixtureTearDown]
         public void TearDown()
         {
-            #if !INTEGRATION
+            #if INTEGRATION
                 // Removes all the queues used for the tests
                 foreach (var guid in usedGuids)
                 {

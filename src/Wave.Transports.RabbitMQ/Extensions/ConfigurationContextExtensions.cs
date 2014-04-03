@@ -17,6 +17,16 @@ namespace Wave.Transports.RabbitMQ.Extensions
 {
     internal static class ConfigurationContextExtensions
     {
+        internal static bool GetAutoDeleteQueues(this IConfigurationContext context)
+        {            
+            return bool.Parse(((string)context["rabbitmq.autodeletequeues"]) ?? "False");
+        }
+
+        internal static void SetAutoDeleteQueues(this IConfigurationContext context, bool autoDelete)
+        {
+            context["rabbitmq.autodeletequeues"] = autoDelete.ToString();
+        }
+
         internal static string GetConnectionString(this IConfigurationContext context)
         {
             return (string)context["rabbitmq.connectionstring"];

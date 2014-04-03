@@ -19,6 +19,7 @@ namespace Wave.Transports.RabbitMQ.Configuration
 {
     public class ConfigurationSettings
     {
+        private bool autoDeleteQueues = false;
         private string connectionString = null;
         private string exchange = "Wave";
 
@@ -50,6 +51,20 @@ namespace Wave.Transports.RabbitMQ.Configuration
             {
                 return this.exchange;
             }
+        }
+
+        public bool AutoDeleteQueues
+        {
+            get
+            {
+                return this.autoDeleteQueues;
+            }
+        }
+
+        public ConfigurationSettings UseAutoDeleteQueues()
+        {
+            this.autoDeleteQueues = true;
+            return this;
         }
 
         public ConfigurationSettings UseConnectionString(string connectionString)

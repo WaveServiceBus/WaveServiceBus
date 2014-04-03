@@ -20,7 +20,7 @@ namespace Wave
 {
     public static class FluentConfigurationSourceExtensions
     {
-        public static FluentConfigurationSource UseUnity(this FluentConfigurationSource builder, UnityContainer container)
+        public static FluentConfigurationSource UseUnity(this FluentConfigurationSource builder, IUnityContainer container)
         {
             return builder.UsingContainer(new UnityContainerAdapter(container));            
         }
