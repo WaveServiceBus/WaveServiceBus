@@ -15,7 +15,7 @@
     <copyright>Copyright 2014 Jonathan Holland</copyright>
     <dependencies>
       <dependency id="Wave.Core" version="[$version$]"/>
-      <dependency id="Unity" version="3.0.1304.1" />      
+      <dependency id="Unity" version="3.5.1404.0" />      
     </dependencies>
   </metadata>
 </package>

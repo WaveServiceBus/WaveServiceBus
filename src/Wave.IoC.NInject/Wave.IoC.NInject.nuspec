@@ -15,7 +15,7 @@
     <copyright>Copyright 2014 Jonathan Holland</copyright>
     <dependencies>
       <dependency id="Wave.Core" version="[$version$]"/>
-      <dependency id="Ninject" version="3.0.1.10"/>      
+      <dependency id="Ninject" version="3.2.2.0"/>      
     </dependencies>
   </metadata>
 </package>

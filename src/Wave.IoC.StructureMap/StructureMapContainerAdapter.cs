@@ -50,11 +50,11 @@ namespace Wave.IoC.StructureMap
         {
             if (scope == Wave.InstanceScope.Singleton)
             {
-                this.container.Configure(x => x.For(from).LifecycleIs(global::StructureMap.InstanceScope.Singleton).Use(to));
+                this.container.Configure(x => x.For(from).LifecycleIs(new global::StructureMap.Pipeline.SingletonLifecycle()).Use(to));
             }
             else
             {
-                this.container.Configure(x => x.For(from).LifecycleIs(global::StructureMap.InstanceScope.Transient).Use(to));
+                this.container.Configure(x => x.For(from).LifecycleIs(new global::StructureMap.Pipeline.TransientLifecycle()).Use(to));
             }
         }
     }
