@@ -32,7 +32,9 @@ namespace Wave.Transports.RabbitMQ
         private readonly String errorQueueName;
         private readonly String primaryQueueName;
         private IConfigurationContext configuration;
-        
+
+        private readonly Lazy<string> encodingName;
+ 
         public RabbitMQTransport(IConfigurationContext configuration)
             : this(configuration.QueueNameResolver.GetPrimaryQueueName(), configuration)
         {            
@@ -41,7 +43,10 @@ namespace Wave.Transports.RabbitMQ
         internal RabbitMQTransport(string baseQueueName, IConfigurationContext configuration)
         {
             this.configuration = MergeConfiguration(configuration);
-          
+
+            // Cache encoding name as looking it from the Encoding class is expensive.
+            this.encodingName = new Lazy<string>(() => configuration.Serializer.Encoding.EncodingName);
+
             this.connectionManager = new RabbitConnectionManager(new Uri(configuration.GetConnectionString()));
             this.primaryQueueName = baseQueueName;
             this.delayQueueName = String.Format("{0}_Delay", this.primaryQueueName);
@@ -142,7 +147,7 @@ namespace Wave.Transports.RabbitMQ
             properties.MessageId = message.Id.ToString();
             properties.AppId = this.primaryQueueName;
             properties.ContentType = this.configuration.Serializer.ContentType;
-            properties.ContentEncoding = this.configuration.Serializer.Encoding.EncodingName;
+            properties.ContentEncoding = this.encodingName.Value;
             properties.SetPersistent(true);
             properties.Timestamp = new AmqpTimestamp((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
             properties.Headers = new Dictionary<String,Object>();
