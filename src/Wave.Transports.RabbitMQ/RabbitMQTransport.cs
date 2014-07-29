@@ -31,9 +31,11 @@ namespace Wave.Transports.RabbitMQ
         private readonly String delayQueueName;
         private readonly String errorQueueName;
         private readonly String primaryQueueName;
-        private IConfigurationContext configuration;
+        private readonly IConfigurationContext configuration;
 
         private readonly Lazy<string> encodingName;
+
+        private readonly ThreadLocal<IModel> sendChannel;
  
         public RabbitMQTransport(IConfigurationContext configuration)
             : this(configuration.QueueNameResolver.GetPrimaryQueueName(), configuration)
@@ -57,6 +59,8 @@ namespace Wave.Transports.RabbitMQ
                 // Create exchange if it doesn't already exist
                 channel.ExchangeDeclare(this.configuration.GetExchange(), "direct", true);
             }
+
+            this.sendChannel = new ThreadLocal<IModel>(() => this.connectionManager.GetChannel());
         }
 
         public void GetDelayMessages(CancellationToken token, Action<RawMessage, Action, Action> onMessageReceived)
@@ -110,14 +114,17 @@ namespace Wave.Transports.RabbitMQ
 
         public void Send(string subscription, RawMessage message)
         {
-            using (var channel = this.connectionManager.GetChannel())
+            if (this.sendChannel.Value.IsClosed)
             {
-                channel.BasicPublish(
-                    this.configuration.GetExchange(),
-                    subscription,
-                    CreateProperties(message, channel),
-                    this.configuration.Serializer.Encoding.GetBytes(message.Data));
+                this.sendChannel.Value.Dispose();
+                this.sendChannel.Value = this.connectionManager.GetChannel();
             }
+
+            this.sendChannel.Value.BasicPublish(
+                this.configuration.GetExchange(),
+                subscription,
+                this.CreateProperties(message, this.sendChannel.Value),
+                this.configuration.Serializer.Encoding.GetBytes(message.Data));
         }
 
         public void SendToDelay(RawMessage message)
@@ -137,6 +144,15 @@ namespace Wave.Transports.RabbitMQ
 
         public void Shutdown()
         {
+            // Dispose all of the channels 
+            foreach (var channel in this.sendChannel.Values)
+            {
+                channel.Dispose();
+            }
+            
+            // Dispose the thread local wrapper
+            this.sendChannel.Dispose();
+
             // Force the RabbitMQ connection to shutdown.
             this.connectionManager.Shutdown();
         }
@@ -165,6 +181,11 @@ namespace Wave.Transports.RabbitMQ
             using (var channel = this.connectionManager.GetChannel())
             {
                 var consumer = new QueueingBasicConsumer(channel);
+                var prefetchCount = (this.configuration.MaxWorkers * 2) >= ushort.MaxValue
+                                        ? ushort.MaxValue
+                                        : (ushort)(this.configuration.MaxWorkers * 2);
+
+                channel.BasicQos(0, prefetchCount, false);
                 channel.BasicConsume(queueName, false, consumer);
                 
                 while (true)
