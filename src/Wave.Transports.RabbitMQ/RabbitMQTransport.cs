@@ -60,7 +60,7 @@ namespace Wave.Transports.RabbitMQ
                 channel.ExchangeDeclare(this.configuration.GetExchange(), "direct", true);
             }
 
-            this.sendChannel = new ThreadLocal<IModel>(() => this.connectionManager.GetChannel());
+            this.sendChannel = new ThreadLocal<IModel>(() => this.connectionManager.GetChannel(), true);
         }
 
         public void GetDelayMessages(CancellationToken token, Action<RawMessage, Action, Action> onMessageReceived)
