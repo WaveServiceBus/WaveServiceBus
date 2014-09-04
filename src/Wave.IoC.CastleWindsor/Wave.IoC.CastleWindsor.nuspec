@@ -15,7 +15,7 @@
     <copyright>Copyright 2014 Jonathan Holland</copyright>
     <dependencies>
       <dependency id="Wave.Core" version="[$version$]"/>
-      <dependency id="Castle.Core" version="3.2.2"/>
+      <dependency id="Castle.Core" version="3.3.0"/>
       <dependency id="Castle.Windsor" version="3.2.1"/>
     </dependencies>
   </metadata>

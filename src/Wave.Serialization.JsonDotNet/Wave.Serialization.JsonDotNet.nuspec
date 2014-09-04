@@ -15,7 +15,7 @@
     <copyright>Copyright 2014 Jonathan Holland</copyright>
     <dependencies>
       <dependency id="Wave.Core" version="[$version$]"/>
-      <dependency id="Newtonsoft.Json" version="6.0.1" />
+      <dependency id="Newtonsoft.Json" version="6.0.3" />
     </dependencies>
   </metadata>
 </package>

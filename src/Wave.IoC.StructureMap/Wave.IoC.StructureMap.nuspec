@@ -15,7 +15,7 @@
     <copyright>Copyright 2014 Jonathan Holland</copyright>
     <dependencies>
       <dependency id="Wave.Core" version="[$version$]"/>
-      <dependency id="structuremap" version="2.6.4.1" />
+      <dependency id="structuremap" version="3.0.3.116" />
     </dependencies>
   </metadata>
 </package>

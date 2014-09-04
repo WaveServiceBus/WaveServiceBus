@@ -25,14 +25,20 @@ using Wave.Utility;
 
 namespace Wave.Transports.RabbitMQ
 {
+    using System.IO;
+
     public class RabbitMQTransport : ITransport
     {
         private readonly RabbitConnectionManager connectionManager;        
         private readonly String delayQueueName;
         private readonly String errorQueueName;
         private readonly String primaryQueueName;
-        private IConfigurationContext configuration;
-        
+        private readonly IConfigurationContext configuration;
+
+        private readonly Lazy<string> encodingName;
+
+        private readonly ThreadLocal<IModel> sendChannel;
+ 
         public RabbitMQTransport(IConfigurationContext configuration)
             : this(configuration.QueueNameResolver.GetPrimaryQueueName(), configuration)
         {            
@@ -41,7 +47,10 @@ namespace Wave.Transports.RabbitMQ
         internal RabbitMQTransport(string baseQueueName, IConfigurationContext configuration)
         {
             this.configuration = MergeConfiguration(configuration);
-          
+
+            // Cache encoding name as looking it from the Encoding class is expensive.
+            this.encodingName = new Lazy<string>(() => configuration.Serializer.Encoding.EncodingName);
+
             this.connectionManager = new RabbitConnectionManager(new Uri(configuration.GetConnectionString()));
             this.primaryQueueName = baseQueueName;
             this.delayQueueName = String.Format("{0}_Delay", this.primaryQueueName);
@@ -52,6 +61,8 @@ namespace Wave.Transports.RabbitMQ
                 // Create exchange if it doesn't already exist
                 channel.ExchangeDeclare(this.configuration.GetExchange(), "direct", true);
             }
+
+            this.sendChannel = new ThreadLocal<IModel>(() => this.connectionManager.GetChannel(), true);
         }
 
         public void GetDelayMessages(CancellationToken token, Action<RawMessage, Action, Action> onMessageReceived)
@@ -105,14 +116,17 @@ namespace Wave.Transports.RabbitMQ
 
         public void Send(string subscription, RawMessage message)
         {
-            using (var channel = this.connectionManager.GetChannel())
+            if (this.sendChannel.Value.IsClosed)
             {
-                channel.BasicPublish(
-                    this.configuration.GetExchange(),
-                    subscription,
-                    CreateProperties(message, channel),
-                    this.configuration.Serializer.Encoding.GetBytes(message.Data));
+                this.sendChannel.Value.Dispose();
+                this.sendChannel.Value = this.connectionManager.GetChannel();
             }
+
+            this.sendChannel.Value.BasicPublish(
+                this.configuration.GetExchange(),
+                subscription,
+                this.CreateProperties(message, this.sendChannel.Value),
+                this.configuration.Serializer.Encoding.GetBytes(message.Data));
         }
 
         public void SendToDelay(RawMessage message)
@@ -132,6 +146,15 @@ namespace Wave.Transports.RabbitMQ
 
         public void Shutdown()
         {
+            // Dispose all of the channels 
+            foreach (var channel in this.sendChannel.Values)
+            {
+                channel.Dispose();
+            }
+            
+            // Dispose the thread local wrapper
+            this.sendChannel.Dispose();
+
             // Force the RabbitMQ connection to shutdown.
             this.connectionManager.Shutdown();
         }
@@ -142,7 +165,7 @@ namespace Wave.Transports.RabbitMQ
             properties.MessageId = message.Id.ToString();
             properties.AppId = this.primaryQueueName;
             properties.ContentType = this.configuration.Serializer.ContentType;
-            properties.ContentEncoding = this.configuration.Serializer.Encoding.EncodingName;
+            properties.ContentEncoding = this.encodingName.Value;
             properties.SetPersistent(true);
             properties.Timestamp = new AmqpTimestamp((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
             properties.Headers = new Dictionary<String,Object>();
@@ -157,19 +180,41 @@ namespace Wave.Transports.RabbitMQ
 
         private void GetMessages(string queueName, CancellationToken token, Action<RawMessage, Action, Action> onMessageReceived)
         {
-            using (var channel = this.connectionManager.GetChannel())
-            {
-                var consumer = new QueueingBasicConsumer(channel);
-                channel.BasicConsume(queueName, false, consumer);
-                
-                while (true)
-                {
-                    if (token.IsCancellationRequested)
-                    {
-                        channel.Dispose();                        
-                        token.ThrowIfCancellationRequested();
-                    }
+            IModel channel = null;
+            QueueingBasicConsumer consumer = null;
 
+            while (true)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    if (channel != null)
+                    {
+                        channel.Dispose();
+                    }
+                    
+                    token.ThrowIfCancellationRequested();
+                }
+
+                if (channel == null)
+                {
+                    // Init / Re-Init Channel
+                    channel = this.connectionManager.GetChannel();
+                    var prefetchCount = (this.configuration.MaxWorkers * 2) >= ushort.MaxValue
+                                            ? ushort.MaxValue
+                                            : (ushort)(this.configuration.MaxWorkers * 2);
+
+                    channel.BasicQos(0, prefetchCount, false);
+                }
+
+                if (consumer == null)
+                {
+                    // Init / Re-Init Consumer
+                    consumer = new QueueingBasicConsumer(channel);
+                    channel.BasicConsume(queueName, false, consumer);
+                }
+
+                try
+                {
                     BasicDeliverEventArgs rabbitMessage;
                     if (consumer.Queue.Dequeue(1500, out rabbitMessage))
                     {
@@ -177,25 +222,60 @@ namespace Wave.Transports.RabbitMQ
                         {
                             continue;
                         }
-                        
+
                         var rawMessage = new RawMessage
                         {
-                            Data = this.configuration.Serializer.Encoding.GetString(rabbitMessage.Body),
+                            Data =
+                                this.configuration.Serializer.Encoding.GetString(
+                                    rabbitMessage.Body),
                             Id = new Guid(rabbitMessage.BasicProperties.MessageId)
                         };
 
                         foreach (var header in rabbitMessage.BasicProperties.Headers)
                         {
-                            rawMessage.Headers[header.Key] = this.configuration.Serializer.Encoding.GetString((Byte[])header.Value);
+                            rawMessage.Headers[header.Key] =
+                                this.configuration.Serializer.Encoding.GetString((Byte[])header.Value);
                         }
 
-                        // Callback and provide an accept and reject callback to the consumer                        
+                        // Callback and provide an accept and reject callback to the consumer   
+                        
+                        // Capture the current reference, as channel might be set to a new channel by a EndOfStreamException
+                        var channelRef = channel;
                         onMessageReceived(
                             rawMessage,
-                            () => channel.BasicAck(rabbitMessage.DeliveryTag, true),
-                            () => channel.BasicNack(rabbitMessage.DeliveryTag, false, true));
+                            () =>
+                                {
+                                    try
+                                    {
+                                        channelRef.BasicAck(rabbitMessage.DeliveryTag, true);
+                                    }
+                                    catch (IOException)
+                                    {
+                                        this.configuration.Logger.WarnFormat("Unable to acknowledge message, delivery channel was closed. Message will be redelivered.");                                        
+                                    }
+                                    
+                                },
+                            () =>
+                                {
+                                    try
+                                    {
+                                        channelRef.BasicNack(rabbitMessage.DeliveryTag, false, true);
+                                    }
+                                    catch (IOException)
+                                    {
+                                        this.configuration.Logger.WarnFormat("Unable to nack message, delivery channel was closed. Message will be redelivered."); 
+                                    }                                    
+                                });
+
                     }
                 }
+                catch (EndOfStreamException ex)
+                {
+                    this.configuration.Logger.WarnFormat("EndOfStreamException encountered, disposing RabbitMQ channel in attempt to reconnect: {0}", ex);
+                    channel.Dispose();
+                    channel = null;
+                    consumer = null;
+                }                
             }
         }
            

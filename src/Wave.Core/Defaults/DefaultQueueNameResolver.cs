@@ -15,21 +15,22 @@
 
 namespace Wave.Defaults
 {
+    using System;
+
     /// <summary>
     /// Default Queue Name Resolver - Sets Primary Queue name to match the name of the hosting process
     /// </summary>
     public class DefaultQueueNameResolver : IQueueNameResolver
     {
-        private readonly IAssemblyLocator assemblyLocator;
-
+        private readonly Lazy<string> queueName;
         public DefaultQueueNameResolver(IAssemblyLocator assemblyLocator)
         {
-            this.assemblyLocator = assemblyLocator;
+            queueName = new Lazy<string>(() => assemblyLocator.GetEntryAssembly().GetName().Name);
         }
 
         public virtual string GetPrimaryQueueName()
         {
-            return this.assemblyLocator.GetEntryAssembly().GetName().Name;
+            return this.queueName.Value;
         }     
     }
 }
