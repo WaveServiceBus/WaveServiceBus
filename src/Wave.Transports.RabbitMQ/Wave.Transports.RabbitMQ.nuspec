@@ -15,7 +15,7 @@
     <copyright>Copyright 2014 Jonathan Holland</copyright>
     <dependencies>
       <dependency id="Wave.Core" version="[$version$]"/>
-      <dependency id="RabbitMQ.Client" version="3.3.0"/>
+      <dependency id="RabbitMQ.Client" version="3.3.5"/>
     </dependencies>
   </metadata>
 </package>
