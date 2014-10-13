@@ -25,7 +25,7 @@ namespace Wave.Transports.RabbitMQ
 
         internal RabbitConnectionManager(Uri connectionString)
         {            
-            this.connectionFactory = new ConnectionFactory { Uri = connectionString.AbsoluteUri, RequestedHeartbeat = 5 };
+            this.connectionFactory = new ConnectionFactory { Uri = connectionString.AbsoluteUri, RequestedHeartbeat = 30 };
             this.connection = new Lazy<IConnection>(CreateConnection);                        
         }
 

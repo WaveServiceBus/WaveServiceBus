@@ -16,7 +16,6 @@
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Threading;
@@ -24,9 +23,7 @@ using Wave.Transports.RabbitMQ.Extensions;
 using Wave.Utility;
 
 namespace Wave.Transports.RabbitMQ
-{
-    using System.IO;
-
+{    
     public class RabbitMQTransport : ITransport
     {
         private readonly RabbitConnectionManager connectionManager;        
@@ -180,41 +177,24 @@ namespace Wave.Transports.RabbitMQ
 
         private void GetMessages(string queueName, CancellationToken token, Action<RawMessage, Action, Action> onMessageReceived)
         {
-            IModel channel = null;
-            QueueingBasicConsumer consumer = null;
-
-            while (true)
+            using (var channel = this.connectionManager.GetChannel())
             {
-                if (token.IsCancellationRequested)
+                var consumer = new QueueingBasicConsumer(channel);
+                var prefetchCount = (this.configuration.MaxWorkers * 2) >= ushort.MaxValue
+                                        ? ushort.MaxValue
+                                        : (ushort)(this.configuration.MaxWorkers * 2);
+
+                channel.BasicQos(0, prefetchCount, false);
+                channel.BasicConsume(queueName, false, consumer);
+
+                while (true)
                 {
-                    if (channel != null)
+                    if (token.IsCancellationRequested)
                     {
                         channel.Dispose();
+                        token.ThrowIfCancellationRequested();
                     }
-                    
-                    token.ThrowIfCancellationRequested();
-                }
 
-                if (channel == null)
-                {
-                    // Init / Re-Init Channel
-                    channel = this.connectionManager.GetChannel();
-                    var prefetchCount = (this.configuration.MaxWorkers * 2) >= ushort.MaxValue
-                                            ? ushort.MaxValue
-                                            : (ushort)(this.configuration.MaxWorkers * 2);
-
-                    channel.BasicQos(0, prefetchCount, false);
-                }
-
-                if (consumer == null)
-                {
-                    // Init / Re-Init Consumer
-                    consumer = new QueueingBasicConsumer(channel);
-                    channel.BasicConsume(queueName, false, consumer);
-                }
-
-                try
-                {
                     BasicDeliverEventArgs rabbitMessage;
                     if (consumer.Queue.Dequeue(1500, out rabbitMessage))
                     {
@@ -225,57 +205,22 @@ namespace Wave.Transports.RabbitMQ
 
                         var rawMessage = new RawMessage
                         {
-                            Data =
-                                this.configuration.Serializer.Encoding.GetString(
-                                    rabbitMessage.Body),
+                            Data = this.configuration.Serializer.Encoding.GetString(rabbitMessage.Body),
                             Id = new Guid(rabbitMessage.BasicProperties.MessageId)
                         };
 
                         foreach (var header in rabbitMessage.BasicProperties.Headers)
                         {
-                            rawMessage.Headers[header.Key] =
-                                this.configuration.Serializer.Encoding.GetString((Byte[])header.Value);
+                            rawMessage.Headers[header.Key] = this.configuration.Serializer.Encoding.GetString((Byte[])header.Value);
                         }
 
-                        // Callback and provide an accept and reject callback to the consumer   
-                        
-                        // Capture the current reference, as channel might be set to a new channel by a EndOfStreamException
-                        var channelRef = channel;
+                        // Callback and provide an accept and reject callback to the consumer                        
                         onMessageReceived(
                             rawMessage,
-                            () =>
-                                {
-                                    try
-                                    {
-                                        channelRef.BasicAck(rabbitMessage.DeliveryTag, true);
-                                    }
-                                    catch (IOException)
-                                    {
-                                        this.configuration.Logger.WarnFormat("Unable to acknowledge message, delivery channel was closed. Message will be redelivered.");                                        
-                                    }
-                                    
-                                },
-                            () =>
-                                {
-                                    try
-                                    {
-                                        channelRef.BasicNack(rabbitMessage.DeliveryTag, false, true);
-                                    }
-                                    catch (IOException)
-                                    {
-                                        this.configuration.Logger.WarnFormat("Unable to nack message, delivery channel was closed. Message will be redelivered."); 
-                                    }                                    
-                                });
-
+                            () => channel.BasicAck(rabbitMessage.DeliveryTag, true),
+                            () => channel.BasicNack(rabbitMessage.DeliveryTag, false, true));
                     }
                 }
-                catch (EndOfStreamException ex)
-                {
-                    this.configuration.Logger.WarnFormat("EndOfStreamException encountered, disposing RabbitMQ channel in attempt to reconnect: {0}", ex);
-                    channel.Dispose();
-                    channel = null;
-                    consumer = null;
-                }                
             }
         }
            
