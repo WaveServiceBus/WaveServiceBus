@@ -21,9 +21,7 @@ using Wave.Configuration;
 using Wave.Consumers;
 
 namespace Wave
-{
-    using System.Web.Handlers;
-
+{    
     public class BusHost : IBusHost
     {
         private bool consumersFaulted;
