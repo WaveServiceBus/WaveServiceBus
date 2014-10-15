@@ -22,8 +22,12 @@ using Wave.Consumers;
 
 namespace Wave
 {
+    using System.Web.Handlers;
+
     public class BusHost : IBusHost
     {
+        private bool consumersFaulted;
+
         private IConfigurationContext configuration;
 
         public BusHost(IConfigurationContext configuration)
@@ -91,11 +95,20 @@ namespace Wave
                 if (!ex.InnerExceptions.All(e => e is OperationCanceledException))
                 {
                     this.configuration.Logger.FatalFormat("Unhandled exception inside of consumer: {0}", ex.ToString());
+                    this.consumersFaulted = true;
                     throw;
                 }
             }
 
             this.configuration.Transport.Shutdown();
+        }
+
+        public virtual bool IsHealthy
+        {
+            get
+            {
+                return !this.consumersFaulted;
+            }
         }
 
         public virtual void Stop()
