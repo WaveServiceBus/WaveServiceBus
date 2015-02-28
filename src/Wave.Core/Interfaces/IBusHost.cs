@@ -17,6 +17,8 @@ namespace Wave
 {
     public interface IBusHost
     {
+        bool IsHealthy { get; }
+
         void Start();
 
         void Stop();
