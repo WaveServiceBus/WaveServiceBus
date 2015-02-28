@@ -50,7 +50,7 @@ namespace Wave.Consumers
             // PriorityQueue is not threadsafe, lock around accessing it
             var @lock = new object();
 
-            // Min-Oriented Priority Queue using DelayUntil as the comparison property
+            // Min-Oriented Priority Queue using DelayUntil/SequenceNumber as the comparison properties
             var messages = new PriorityQueue<MessageWrapper>((x, y) => x.CompareTo(y));
 
             // Background task that is constantly checking the in memory priority queue
@@ -119,7 +119,7 @@ namespace Wave.Consumers
 
             // Ask the transport to start sending messages from the delay queue and push them into
             // the internal priority queue
-            ulong deliveryTag = 0;
+            ulong sequenceNumber = 0;
             transport.GetDelayMessages(
                 this.configuration.TokenSource.Token,
                 (message, ack, reject) =>
@@ -131,7 +131,7 @@ namespace Wave.Consumers
                             RawMessage = message,
                             Acknowledge = ack,
                             Reject = reject,
-                            DeliveryTag = deliveryTag++
+                            SequenceNumber = sequenceNumber++
                         });
                     }
 
@@ -163,13 +163,13 @@ namespace Wave.Consumers
             /// <summary>
             /// A monotic counter indicating order of message delivery.
             /// </summary>
-            public ulong DeliveryTag { get; set; }
+            public ulong SequenceNumber { get; set; }
 
             public int CompareTo(MessageWrapper other)
             {
                 if (this.RawMessage.DelayUntil == other.RawMessage.DelayUntil)
                 {
-                    return this.DeliveryTag.CompareTo(other.DeliveryTag);
+                    return this.SequenceNumber.CompareTo(other.SequenceNumber);
                 }
 
                 return this.RawMessage.DelayUntil.GetValueOrDefault(DateTime.MinValue)
