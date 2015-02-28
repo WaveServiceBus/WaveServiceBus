@@ -64,12 +64,18 @@ namespace Wave.Transports.RabbitMQ
 
         public void GetDelayMessages(CancellationToken token, Action<RawMessage, Action, Action> onMessageReceived)
         {
-            this.GetMessages(this.delayQueueName, token, onMessageReceived);
+            // NOTE:  Messages from the delay queue can be acked in an order different than the order of message delivery, since
+            //        the order of acks depends on the DelayUntil DateTime value.
+            //        If AckMultiple=true and a message with a later delivery tag is acked, then the channel throws an error
+            //        when trying to ack a message with a previous delivery tag since it's considered a duplicate ack.
+            const bool AckMultiple = false;
+            this.GetMessages(this.delayQueueName, AckMultiple, token, onMessageReceived);
         }
 
         public void GetMessages(CancellationToken token, Action<RawMessage, Action, Action> onMessageReceived)
         {
-            this.GetMessages(this.primaryQueueName, token, onMessageReceived);
+            const bool AckMultiple = true;
+            this.GetMessages(this.primaryQueueName, AckMultiple, token, onMessageReceived);
         }
 
         public void InitializeForConsuming()
@@ -175,7 +181,7 @@ namespace Wave.Transports.RabbitMQ
             return properties;
         }
 
-        private void GetMessages(string queueName, CancellationToken token, Action<RawMessage, Action, Action> onMessageReceived)
+        private void GetMessages(string queueName, bool ackMultiple, CancellationToken token, Action<RawMessage, Action, Action> onMessageReceived)
         {
             using (var channel = this.connectionManager.GetChannel())
             {
@@ -217,7 +223,7 @@ namespace Wave.Transports.RabbitMQ
                         // Callback and provide an accept and reject callback to the consumer                        
                         onMessageReceived(
                             rawMessage,
-                            () => channel.BasicAck(rabbitMessage.DeliveryTag, true),
+                            () => channel.BasicAck(rabbitMessage.DeliveryTag, ackMultiple),
                             () => channel.BasicNack(rabbitMessage.DeliveryTag, false, true));
                     }
                 }

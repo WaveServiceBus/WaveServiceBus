@@ -14,6 +14,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Wave.Utility;
@@ -50,9 +51,7 @@ namespace Wave.Consumers
             var @lock = new object();
 
             // Min-Oriented Priority Queue using DelayUntil as the comparison property
-            var messages = new PriorityQueue<MessageWrapper>(
-                 (x, y) => x.RawMessage.DelayUntil.GetValueOrDefault(DateTime.MinValue)
-                            .CompareTo(y.RawMessage.DelayUntil.GetValueOrDefault(DateTime.MinValue)));
+            var messages = new PriorityQueue<MessageWrapper>((x, y) => x.CompareTo(y));
 
             // Background task that is constantly checking the in memory priority queue
             // for expired delay messages and publishing them into the primary queue
@@ -86,6 +85,7 @@ namespace Wave.Consumers
                     resetEvent.WaitOne((maxWait > TimeSpan.Zero) ? maxWait : TimeSpan.Zero);
                     resetEvent.Reset();
 
+                    var expiredMessages = new List<MessageWrapper>();
                     lock (@lock)
                     {
                         if (messages.IsEmpty || cancelToken.IsCancellationRequested)
@@ -105,16 +105,21 @@ namespace Wave.Consumers
                                 break;
                             }
 
-                            message = messages.Dequeue();
-                            transport.SendToPrimary(message.RawMessage);
-                            message.Acknowledge();
+                            expiredMessages.Add(messages.Dequeue());
                         }
+                    }
+
+                    foreach (var message in expiredMessages)
+                    {
+                        transport.SendToPrimary(message.RawMessage);
+                        message.Acknowledge();
                     }
                 }
             });
 
             // Ask the transport to start sending messages from the delay queue and push them into
             // the internal priority queue
+            ulong deliveryTag = 0;
             transport.GetDelayMessages(
                 this.configuration.TokenSource.Token,
                 (message, ack, reject) =>
@@ -125,7 +130,8 @@ namespace Wave.Consumers
                         {
                             RawMessage = message,
                             Acknowledge = ack,
-                            Reject = reject
+                            Reject = reject,
+                            DeliveryTag = deliveryTag++
                         });
                     }
 
@@ -146,13 +152,29 @@ namespace Wave.Consumers
 
         // Because we need to pass a reference to the transport ack/reject
         // callbacks with the raw message
-        private class MessageWrapper
+        private class MessageWrapper : IComparable<MessageWrapper>
         {
             public Action Acknowledge { get; set; }
 
             public RawMessage RawMessage { get; set; }
 
             public Action Reject { get; set; }
+
+            /// <summary>
+            /// A monotic counter indicating order of message delivery.
+            /// </summary>
+            public ulong DeliveryTag { get; set; }
+
+            public int CompareTo(MessageWrapper other)
+            {
+                if (this.RawMessage.DelayUntil == other.RawMessage.DelayUntil)
+                {
+                    return this.DeliveryTag.CompareTo(other.DeliveryTag);
+                }
+
+                return this.RawMessage.DelayUntil.GetValueOrDefault(DateTime.MinValue)
+                    .CompareTo(other.RawMessage.DelayUntil.GetValueOrDefault(DateTime.MinValue));
+            }
         }
     }
 }
