@@ -13,12 +13,14 @@
 *  limitations under the License.
 */
 
+using System;
+
 namespace Wave
 {
     public interface IBusClient
     {
-        void Publish(object message);
+        void Publish(object message, TimeSpan? expiration = null);
 
-        void Send(string route, object message);
+        void Send(string route, object message, TimeSpan? expiration = null);
     }
 }

@@ -100,14 +100,19 @@ namespace Wave.Transports.MSMQ
         {
             this.subscriptions.AddOrUpdate(subscription, String.Empty, (k, v) => String.Empty);
         }
-       
-        public void Send(string subscription, object message)
+
+        public void Send(string subscription, object message, TimeSpan? expiration = null)
         {
             this.Send(subscription, RawMessage.Create(message));
         }
 
-        public void Send(string subscription, RawMessage message)
+        public void Send(string subscription, RawMessage message, TimeSpan? expiration = null)
         {
+            if (expiration.HasValue)
+            {
+                throw new NotImplementedException("Message expiration is not implemented for this transport");
+            }
+
             this.outboundQueue.Send(message);
         }
 

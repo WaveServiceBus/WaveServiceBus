@@ -13,6 +13,8 @@
 *  limitations under the License.
 */
 
+using System.Globalization;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
@@ -112,12 +114,12 @@ namespace Wave.Transports.RabbitMQ
             }
         }
 
-        public void Send(string subscription, object message)
+        public void Send(string subscription, object message, TimeSpan? expiration = null)
         {
-            this.Send(subscription, RawMessage.Create(message));
+            this.Send(subscription, RawMessage.Create(message), expiration);
         }
 
-        public void Send(string subscription, RawMessage message)
+        public void Send(string subscription, RawMessage message, TimeSpan? expiration = null)
         {
             if (this.sendChannel.Value.IsClosed)
             {
@@ -128,7 +130,7 @@ namespace Wave.Transports.RabbitMQ
             this.sendChannel.Value.BasicPublish(
                 this.configuration.GetExchange(),
                 subscription,
-                this.CreateProperties(message, this.sendChannel.Value),
+                this.CreateProperties(message, this.sendChannel.Value, expiration),
                 this.configuration.Serializer.Encoding.GetBytes(message.Data));
         }
 
@@ -162,7 +164,7 @@ namespace Wave.Transports.RabbitMQ
             this.connectionManager.Shutdown();
         }
 
-        private IBasicProperties CreateProperties(RawMessage message, IModel channel)
+        private IBasicProperties CreateProperties(RawMessage message, IModel channel, TimeSpan? expiration)
         {
             var properties = channel.CreateBasicProperties();
             properties.MessageId = message.Id.ToString();
@@ -171,6 +173,10 @@ namespace Wave.Transports.RabbitMQ
             properties.ContentEncoding = this.encodingName.Value;
             properties.SetPersistent(true);
             properties.Timestamp = new AmqpTimestamp((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
+            if (expiration.HasValue)
+            {
+                properties.Expiration = expiration.Value.Milliseconds.ToString(CultureInfo.InvariantCulture);
+            }
             properties.Headers = new Dictionary<String,Object>();
 
             foreach (var pair in message.Headers)
