@@ -97,7 +97,7 @@ namespace Wave.Defaults
         /// </summary>
         /// <param name="subscription"></param>
         /// <param name="message"></param>
-        public void Send(string subscription, object message)
+        public void Send(string subscription, object message, TimeSpan? expiration = null)
         {          
             this.Send(subscription, RawMessage.Create(message));
         }
@@ -107,8 +107,14 @@ namespace Wave.Defaults
         /// </summary>
         /// <param name="subscription"></param>
         /// <param name="message"></param>
-        public void Send(string subscription, RawMessage message)
+        /// <param name="expiration"></param>
+        public void Send(string subscription, RawMessage message, TimeSpan? expiration = null)
         {
+            if (expiration.HasValue)
+            {
+                throw new NotImplementedException("Message expiration is not implemented for this transport");
+            }
+
             if (this.primaryQueue.Enqueue(subscription, message))
             {
                 this.primaryResetEvent.Set();

@@ -37,16 +37,16 @@ namespace Wave
             get { return this.configurationContext; }
         }
 
-        public void Publish(object message)
+        public void Publish(object message, TimeSpan? expiration = null)
         {
-            this.Send(this.keyResolver.GetKey(message.GetType()), message);
+            this.Send(this.keyResolver.GetKey(message.GetType()), message, expiration);
         }
 
-        public void Send(string route, object message)
+        public void Send(string route, object message, TimeSpan? expiration = null)
         {
             if (this.PerformFilters(message.GetType(), route, message))
             {
-                this.transport.Send(route, message);
+                this.transport.Send(route, message, expiration);
             }
         }
 

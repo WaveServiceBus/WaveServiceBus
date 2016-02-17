@@ -30,9 +30,9 @@ namespace Wave
 
         void RegisterSubscription(string subscription);
 
-        void Send(string subscription, object message);
+        void Send(string subscription, object message, TimeSpan? expiration = null);
 
-        void Send(string subscription, RawMessage message);
+        void Send(string subscription, RawMessage message, TimeSpan? expiration = null);
 
         void SendToDelay(RawMessage message);
 
