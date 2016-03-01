@@ -73,7 +73,7 @@ namespace Wave.Filters
             }
             else
             {
-                this.log.Value.InfoFormat("Delivery rate limit exceeded - Redelivering message {0} in {1}ms", message.ToString(), this.delayInterval.TotalMilliseconds);
+                this.log.Value.DebugFormat("Delivery rate limit exceeded - Redelivering message {0} in {1}ms", message.ToString(), this.delayInterval.TotalMilliseconds);
                 return this.Delay(this.delayInterval);
             }
         }
